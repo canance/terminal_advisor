@@ -55,7 +55,9 @@ optional arguments:
 ```
 
 ## Future Development
-- TBD
+- Add search for 'eAdvising'
+- Pull advisee's schedule for a specific term
+- Pull midterm grades
 
 
 
