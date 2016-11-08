@@ -8,7 +8,7 @@ setup(
         '': ['LICENSE.txt'],
     },
     entry_points = {
-        'console_scripts': ['terminal_advisor = terminal_advisor.terminal_advisor:main'],
+        'console_scripts': ['terminal_advisor = terminal_advisor.__main__:main'],
     },
     # metadata for upload to PyPI
     author="Cory Nance",
