@@ -1,15 +1,14 @@
 from setuptools import setup, find_packages
 setup(
     name="terminal_advisor",
-    version="1.0",
+    version="1.1",
     packages=find_packages(),
-    scripts=['terminal_advisor.py'],
     install_requires=['bs4', 'configparser', 'keyring', 'pdfkit', 'selenium'],
     package_data={
         '': ['LICENSE.txt'],
     },
     entry_points = {
-        'console_scripts': ['terminal_advisor=terminal_advisor:main'],
+        'console_scripts': ['terminal_advisor = terminal_advisor.terminal_advisor:main'],
     },
     # metadata for upload to PyPI
     author="Cory Nance",
