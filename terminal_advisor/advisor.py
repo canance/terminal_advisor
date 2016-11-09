@@ -76,11 +76,7 @@ class Advisor:
         driver.find_element_by_name("SUBMIT2").click()
         html = driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
-        
-        found = False
-        row_num = -1
-        stu_name = None 
-        stu_id = None
+
         possible_matches = []
         if advisee.isnumeric(): # search by id
             for p in soup.find_all('p', {'id': re.compile('^LIST_VAR10_')}):
@@ -135,22 +131,26 @@ class Advisor:
             print("Running program evaluation for %s (%s)..." % (stu_name, stu_id))
             Select(driver.find_element_by_id("LIST_VAR2_%s" % row_num)).select_by_visible_text("EVAL Evaluate Program")
             driver.find_element_by_name("SUBMIT2").click()
-            driver.find_element_by_id("LIST_VAR1_1").click()
-            driver.find_element_by_name("SUBMIT2").click()
-            try:
-                delay = 60
-                element_present = EC.presence_of_element_located((By.ID, 'FNoteInnerTable'))
-                WebDriverWait(driver, delay).until(element_present)
-                soup = BeautifulSoup(driver.page_source, 'html.parser')
-                css = str(soup.find('style'))
-                stu_table = str(soup.find(id='StudentTable'))
-                html = '<html><head>%s</head><body>%s</body></html>' % (css, stu_table)
-                file_name = '%s_%s_eval' % (stu_name, stu_id)
-                file_name = file_name.replace('.', '').replace(' ', '_')
-                file_name = file_name + '.pdf'
-                pdfkit.from_string(html, file_name)
-            except TimeoutException:
-                print("Webadvisor timed out!")
+            self._process_program_evaluation(stu_name, stu_id)
+
+    def _process_program_evaluation(self, stu_name, stu_id):
+        driver = self.driver
+        driver.find_element_by_id("LIST_VAR1_1").click()
+        driver.find_element_by_name("SUBMIT2").click()
+        try:
+            delay = 60
+            element_present = EC.presence_of_element_located((By.ID, 'FNoteInnerTable'))
+            WebDriverWait(driver, delay).until(element_present)
+            soup = BeautifulSoup(driver.page_source, 'html.parser')
+            css = str(soup.find('style'))
+            stu_table = str(soup.find(id='StudentTable'))
+            html = '<html><head>%s</head><body>%s</body></html>' % (css, stu_table)
+            file_name = '%s_%s_eval' % (stu_name, stu_id)
+            file_name = file_name.replace('.', '').replace(' ', '_')
+            file_name += '.pdf'
+            pdfkit.from_string(html, file_name)
+        except TimeoutException:
+            print("Webadvisor timed out!")
 
     def remove_advisor_hold(self, advisee):
         """ Remove advisor hold for an advisee. """
@@ -166,19 +166,19 @@ class Advisor:
             driver.find_element_by_id("VAR9").click()
             driver.find_element_by_name("SUBMIT2").click()
 
-    def is_element_present(self, how, what):
+    def _is_element_present(self, how, what):
         """ Selenium generated method. """
         try: self.driver.find_element(by=how, value=what)
         except NoSuchElementException as e: return False
         return True
     
-    def is_alert_present(self):
+    def _is_alert_present(self):
         """ Selenium generated method. """
         try: self.driver.switch_to_alert()
         except NoAlertPresentException as e: return False
         return True
     
-    def close_alert_and_get_its_text(self):
+    def _close_alert_and_get_its_text(self):
         """ Selenium generated method. """
         try:
             alert = self.driver.switch_to_alert()
@@ -191,7 +191,7 @@ class Advisor:
         finally:
             self.accept_next_alert = True
     
-    def tearDown(self):
+    def _tear_down(self):
         """ Selenium generated method. """
         self.driver.quit()
         self.assertEqual([], self.verificationErrors)
