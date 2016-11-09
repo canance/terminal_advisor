@@ -8,7 +8,7 @@ import os.path
 from terminal_advisor.advisor import Advisor
 
 
-def parse_config(args, config_path=['config.ini', os.path.join(os.environ['HOME'], '.terminal_advisor/config.ini')]):
+def parse_config(args, config_path=['config.ini', os.path.join(os.path.expanduser('~'), '.terminal_advisor/config.ini')]):
     """ Setup configuration for program.  This function will also read or create a configuraiton file. """
     config = configparser.ConfigParser()
     if not isinstance(config_path, list):
