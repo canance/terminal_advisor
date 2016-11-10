@@ -78,30 +78,16 @@ class Advisor:
         soup = BeautifulSoup(html, 'html.parser')
 
         possible_matches = []
-        if advisee.isnumeric(): # search by id
-            for p in soup.find_all('p', {'id': re.compile('^LIST_VAR10_')}):
-                if advisee == p.string:
-                    row_num = p.attrs['id'].split('_')[-1]
-                    stu_name = soup.find(id='LIST_VAR1_%s' % row_num).string
-                    stu_id = p.string
-                    match = {
-                        'row_num': row_num,
-                        'stu_name': stu_name,
-                        'stu_id': stu_id,
-                    }
-                    possible_matches.append(match)          
-        else: # search by name
-            for p in soup.find_all('p', {'id': re.compile('^LIST_VAR1_')}):
-                if advisee.lower() in p.string.lower():
-                    row_num = p.attrs['id'].split('_')[-1]
-                    stu_id = soup.find(id='LIST_VAR10_%s' % row_num).string
-                    stu_name = p.string
-                    match = {
-                        'row_num': row_num,
-                        'stu_name': stu_name,
-                        'stu_id': stu_id,
-                    }
-                    possible_matches.append(match)
+
+        for p in soup.find_all('p', {'id': re.compile('^LIST_VAR1_')}):
+            if advisee.lower() in p.string.lower():
+                row_num = p.attrs['id'].split('_')[-1]
+                stu_name = p.string
+                match = {
+                    'row_num': row_num,
+                    'stu_name': stu_name,
+                }
+                possible_matches.append(match)
 
         if len(possible_matches) == 0:
             match = None
@@ -110,7 +96,7 @@ class Advisor:
         else:
             selection = -1
             for num, match in enumerate(possible_matches):
-                print('%d: %s (%s)' % (num+1, match['stu_name'], match['stu_id']))
+                print('%d: %s' % (num+1, match['stu_name']))
             print('%d: Exit' % (len(possible_matches) + 1))
             while selection not in range(0, len(possible_matches) + 2):
                 selection = int(input('Advisee: '))
@@ -126,14 +112,13 @@ class Advisor:
         driver = self.driver
         if advisee is not None:
             stu_name = advisee['stu_name']
-            stu_id = advisee['stu_id']
             row_num = advisee['row_num']
-            print("Running program evaluation for %s (%s)..." % (stu_name, stu_id))
+            print("Running program evaluation for %s..." % stu_name)
             Select(driver.find_element_by_id("LIST_VAR2_%s" % row_num)).select_by_visible_text("EVAL Evaluate Program")
             driver.find_element_by_name("SUBMIT2").click()
-            self._process_program_evaluation(stu_name, stu_id)
+            self._process_program_evaluation(stu_name)
 
-    def _process_program_evaluation(self, stu_name, stu_id):
+    def _process_program_evaluation(self, stu_name):
         driver = self.driver
         driver.find_element_by_id("LIST_VAR1_1").click()
         driver.find_element_by_name("SUBMIT2").click()
@@ -145,8 +130,8 @@ class Advisor:
             css = str(soup.find('style'))
             stu_table = str(soup.find(id='StudentTable'))
             html = '<html><head>%s</head><body>%s</body></html>' % (css, stu_table)
-            file_name = '%s_%s_eval' % (stu_name, stu_id)
-            file_name = file_name.replace('.', '').replace(' ', '_')
+            file_name = '%s_eval' % stu_name
+            file_name = file_name.replace('.', '').replace(',', '_').replace(' ', '_')
             file_name += '.pdf'
             pdfkit.from_string(html, file_name)
         except TimeoutException:
@@ -158,9 +143,8 @@ class Advisor:
         driver = self.driver
         if advisee is not None:
             stu_name = advisee['stu_name']
-            stu_id = advisee['stu_id']
             row_num = advisee['row_num']
-            print("Removing advising hold for %s (%s)..." % (stu_name, stu_id))
+            print("Removing advising hold for %s..." % stu_name)
             Select(driver.find_element_by_id("LIST_VAR2_%s" % row_num)).select_by_visible_text("PERC Remove Advisor Hold")
             driver.find_element_by_name("SUBMIT2").click()
             driver.find_element_by_id("VAR9").click()
@@ -168,14 +152,18 @@ class Advisor:
 
     def _is_element_present(self, how, what):
         """ Selenium generated method. """
-        try: self.driver.find_element(by=how, value=what)
-        except NoSuchElementException as e: return False
+        try:
+            self.driver.find_element(by=how, value=what)
+        except NoSuchElementException:
+            return False
         return True
     
     def _is_alert_present(self):
         """ Selenium generated method. """
-        try: self.driver.switch_to_alert()
-        except NoAlertPresentException as e: return False
+        try:
+            self.driver.switch_to_alert()
+        except NoAlertPresentException:
+            return False
         return True
     
     def _close_alert_and_get_its_text(self):

@@ -80,7 +80,7 @@ def get_args():
     parser.add_argument('-s', '--save-config', dest='save_config', action='store_true', help='Save configuration file')
     parser.add_argument('-r', '--remove-hold', dest='remove_hold', action='store_true', help='Remove the advisement hold')
     parser.add_argument('-e', '--program-eval', dest='prog_eval', action='store_true', help='Run a program evaluation')
-    parser.add_argument('advisee', nargs='?', help="An advisee's name or student ID number.")
+    parser.add_argument('advisee', nargs='?', help="An advisee's name or a substring of the advisee's name.")
     return parser.parse_args()
 
 
