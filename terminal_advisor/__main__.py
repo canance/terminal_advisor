@@ -81,6 +81,7 @@ def get_args():
     parser.add_argument('-r', '--remove-hold', dest='remove_hold', action='store_true', help='Remove the advisement hold')
     parser.add_argument('-e', '--program-eval', dest='prog_eval', action='store_true', help='Run a program evaluation')
     parser.add_argument('advisee', nargs='?', help="An advisee's name or a substring of the advisee's name.")
+    parser.add_argument('--gui', dest='gui', action='store_true', help='Run in GUI mode.')
     return parser.parse_args()
 
 
@@ -89,13 +90,20 @@ def main():
     args = get_args()
     config, password = parse_config(args)
     
-    if args.advisee is not None:
-        advisee = args.advisee
-    else:    
-        advisee = input('Advisee: ')
+
     
     advisor = Advisor(config['DEFAULT']['WebadvisorURL'], config['DEFAULT']['user'], password, config['DEFAULT']['Driver'])
-    
+
+    if args.gui:
+        from terminal_advisor import gui
+        gui.main(advisor)
+        sys.exit(0)
+
+    if args.advisee is not None:
+        advisee = args.advisee
+    else:
+        advisee = input('Advisee: ')
+
     if args.remove_hold:
         advisor.remove_advisor_hold(advisee)
     elif args.prog_eval:
@@ -103,15 +111,18 @@ def main():
     else:    
         print('1. Remove Advisor Hold')
         print('2. Run Program Evaluation')
-        print('3. Quit')
+        print('3. List Advisees')
+        print('4. Quit')
         selection = -1
-        while selection not in [1, 2, 3]:
+        while selection not in range(1, 5):
             selection = int(input('Choice: '))
         if selection == 1:
             advisor.remove_advisor_hold(advisee)
         elif selection == 2:
             advisor.run_program_evaluation(advisee)
         elif selection == 3:
+            print(advisor.list_advisees())
+        elif selection == 4:
             sys.exit(0)
 
 

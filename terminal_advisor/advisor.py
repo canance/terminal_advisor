@@ -62,6 +62,30 @@ class Advisor:
         driver.find_element_by_id("CURR_PWD").send_keys(self.password)
         driver.find_element_by_name("SUBMIT2").click()
 
+
+    def list_advisees(self):
+        """ Return a list of advisees. """
+        driver = self.driver
+        driver.find_element_by_link_text("Faculty").click()
+        driver.find_element_by_xpath("//div[@id='bodyForm']/div[3]/div[2]/ul[2]/li[2]/a/span").click()
+        driver.find_element_by_id("DATE_VAR1").clear()
+        today = time.strftime("%m/%d/%Y")
+        driver.find_element_by_id("DATE_VAR1").send_keys(today)
+        driver.find_element_by_id("DATE_VAR2").clear()
+        driver.find_element_by_id("DATE_VAR2").send_keys(today)
+        driver.find_element_by_name("SUBMIT2").click()
+        html = driver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+
+        advisees = []
+
+        for p in soup.find_all('p', {'id': re.compile('^LIST_VAR1_')}):
+            advisee = p.string
+            advisees.append(advisee)
+
+        driver.get(self.base_url + "/")
+        return advisees
+
     def advisee_search(self, advisee):
         """ Search for an advisee. """
         print("Searching for %s..." % advisee)
@@ -117,6 +141,7 @@ class Advisor:
             Select(driver.find_element_by_id("LIST_VAR2_%s" % row_num)).select_by_visible_text("EVAL Evaluate Program")
             driver.find_element_by_name("SUBMIT2").click()
             self._process_program_evaluation(stu_name)
+        driver.get(self.base_url + "/")
 
     def _process_program_evaluation(self, stu_name):
         driver = self.driver
@@ -149,6 +174,7 @@ class Advisor:
             driver.find_element_by_name("SUBMIT2").click()
             driver.find_element_by_id("VAR9").click()
             driver.find_element_by_name("SUBMIT2").click()
+        driver.get(self.base_url + "/")
 
     def _is_element_present(self, how, what):
         """ Selenium generated method. """
