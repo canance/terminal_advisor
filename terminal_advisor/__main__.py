@@ -9,7 +9,7 @@ from terminal_advisor.advisor import Advisor
 
 
 def parse_config(args, config_path=['config.ini', os.path.join(os.path.expanduser('~'), '.terminal_advisor', 'config.ini')]):
-    """ Setup configuration for program.  This function will also read or create a configuraiton file. """
+    """ Setup configuration for program.  This function will also read or create a configuration file. """
     config = configparser.ConfigParser()
     if not isinstance(config_path, list):
         config_path = [config_path]
@@ -17,7 +17,7 @@ def parse_config(args, config_path=['config.ini', os.path.join(os.path.expanduse
         if os.path.isfile(path):
             config.read(path)
             break
-    if len(config.sections()) == 0: # make config
+    if len(config.sections()) == 0:  # make config
         config['DEFAULT'] = {
             'User': '',
             'WebadvisorURL': '',
@@ -27,7 +27,6 @@ def parse_config(args, config_path=['config.ini', os.path.join(os.path.expanduse
             'Use': 'false',
             'Keychain': 'terminaladvisor-webadvisor',
         }
-
 
     if args.user is not None:
         config['DEFAULT']['User'] = args.user
@@ -89,14 +88,12 @@ def main():
     """ Main function.  Parse command-line arguments, load configuration, process commands. """
     args = get_args()
     config, password = parse_config(args)
-    
 
-    
     advisor = Advisor(config['DEFAULT']['WebadvisorURL'], config['DEFAULT']['user'], password, config['DEFAULT']['Driver'])
 
     if args.gui:
-        from terminal_advisor import gui
-        gui.main(advisor)
+        from terminal_advisor.gui import main
+        main.main(advisor)
         sys.exit(0)
 
     if args.advisee is not None:
