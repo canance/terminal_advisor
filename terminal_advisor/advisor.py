@@ -32,7 +32,7 @@ __status__ = "Development"
 class Advisor:
     """ Class to interact with webadvisor """
     
-    def __init__(self, base_url, username, password, driver='PhantomJS'):
+    def __init__(self, base_url='', username='', password='', driver='PhantomJS'):
         """ Setup instance variables for Advisor and login to webadvisor. """
         if driver == 'PhantomJS':
             self.driver = webdriver.PhantomJS(service_log_path=os.path.devnull)
@@ -49,10 +49,20 @@ class Advisor:
         self.accept_next_alert = True
         self.username = username
         self.password = password
-        self.login()
+        self.logged_in = False
+
+    def login_ready(self):
+        return self.username and self.password and self.base_url
 
     def login(self):
         """ Login to webadvisor. """
+
+        if not self.login_ready():
+            raise AssertionError('Login is not ready!')
+
+        if self.logged_in:
+            self.logout()
+
         driver = self.driver
         driver.get(self.base_url + "/")
         driver.find_element_by_css_selector("#acctLogin > a > span.label").click()
@@ -61,7 +71,15 @@ class Advisor:
         driver.find_element_by_id("CURR_PWD").clear()
         driver.find_element_by_id("CURR_PWD").send_keys(self.password)
         driver.find_element_by_name("SUBMIT2").click()
+        self.logged_in = True
 
+    def logout(self):
+        """ Logout of webadvisor """
+        driver = self.driver
+        driver.find_element_by_css_selector("#acctLogout > a > span.label").click()
+        self._close_alert_and_get_its_text()
+        self.logged_in = False
+        driver.get(self.base_url + "/")
 
     def list_advisees(self):
         """ Return a list of advisees. """

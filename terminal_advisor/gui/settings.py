@@ -2,21 +2,32 @@
 
 # source: https://nikolak.com/pyqt-qt-designer-getting-started/
 
-import sys
 
 from PyQt5.QtCore import pyqtSlot
-
 from PyQt5 import QtWidgets
 from terminal_advisor.gui.qt import settings_window
 from terminal_advisor.gui.threads import Save, Login
+from terminal_advisor import __main__
+import keyring
 
 
 class GUIApp(QtWidgets.QMainWindow, settings_window.Ui_SettingsWindow):
 
-    def __init__(self, advisor):
+    def __init__(self, advisor, config):
         super(self.__class__, self).__init__()
         self.advisor = advisor
         self.setupUi(self)
+        self.config = config
+        self.config = __main__.parse_config(__main__.get_args())
+        self.login_thread = None
+        self.save_thread = None
+
+        # populate form fields
+        self.line_edit_user.setText(config['DEFAULT']['user'])
+        self.line_edit_url.setText(config['DEFAULT']['WebadvisorURL'])
+        if config['KEYRING']['use'].lower().strip() == 'true':
+            password = keyring.get_password(config['KEYRING']['Keychain'], config['DEFAULT']['User'])
+            self.line_edit_pass.setText(password)
 
         # connections
         self.button_login.clicked.connect(self.login)
@@ -29,9 +40,9 @@ class GUIApp(QtWidgets.QMainWindow, settings_window.Ui_SettingsWindow):
         user = self.line_edit_user.text()
         password = self.line_edit_pass.text()
 
-        login_thread = Login(base_url, user, password)
-        login_thread.done.connect(self.login_done)
-        login_thread.start()
+        self.login_thread = Login(self.advisor, base_url, user, password)
+        self.login_thread.done.connect(self.login_done)
+        self.login_thread.start()
 
     @pyqtSlot()
     def login_done(self):
@@ -43,10 +54,11 @@ class GUIApp(QtWidgets.QMainWindow, settings_window.Ui_SettingsWindow):
         user = self.line_edit_user.text()
         password = self.line_edit_pass.text()
         save_password = self.check_box_save_password.isChecked()
-        save_thread = Save(base_url, user, password, save_password)
-        save_thread.done.connect(self.save_done())
-        save_thread.start()
+
+        self.save_thread = Save(self.advisor, base_url, user, password, save_password)
+        self.save_thread.done.connect(self.save_done)
+        self.save_thread.start()
 
     @pyqtSlot()
     def save_done(self):
-        pass
+        self.config = __main__.parse_config(__main__.get_args())

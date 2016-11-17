@@ -5,6 +5,7 @@ import os
 import configparser
 import keyring
 
+
 advisee_list = []
 
 # ---------------------------------------------------- main.py threads
@@ -79,71 +80,80 @@ class Login(QThread):
 
     done = pyqtSignal()
 
-    def __init__(self, advisor, base_url, user_name, password):
+    def __init__(self, advisor, base_url, username, password):
         QThread.__init__(self)
         self.advisor = advisor
         self.base_url = base_url
-        self.user_name = user_name
+        self.username = username
         self.password = password
 
-        def __del__(self):
-            self.wait()
+    def __del__(self):
+        self.wait()
 
-        def run(self):
-            pass
+    def run(self):
+        self.advisor.username = self.username
+        self.advisor.password = self.password
+        self.advisor.base_url = self.base_url
+        self.advisor.login()
+        self.done.emit()
 
 
 class Save(QThread):
 
     done = pyqtSignal()
 
-    def __init__(self, advisor, base_url, user_name, password, save_password):
+    def __init__(self, advisor, base_url, username, password, save_password):
         QThread.__init__(self)
         self.advisor = advisor
         self.base_url = base_url
-        self.user_name = user_name
+        self.username = username
         self.password = password
         self.save_password = save_password
 
-        def __del__(self):
-            self.wait()
+    def __del__(self):
+        self.wait()
 
-        def run(self):
-            pass
+    def run(self):
+        kwargs = {
+            'user': self.username,
+            'base_url': self.base_url,
+            'driver': 'Chrome',
+            'save_password': str(self.save_password),
+            'password': self.password,
+        }
 
-        def parse_config(**kwargs):
-            """ Setup configuration for program.  This function will also read or create a configuration file. """
-            config_path = 'config.ini', os.path.join(os.path.expanduser('~'), '.terminal_advisor', 'config.ini')
-            config = configparser.ConfigParser()
-            config.read(config_path)
-            if len(config.sections()) == 0:  # make config
-                config['DEFAULT'] = {
-                    'User': '',
-                    'WebadvisorURL': '',
-                    'Driver': '',
-                }
-                config['KEYRING'] = {
-                    'Use': 'false',
-                    'Keychain': 'terminaladvisor-webadvisor',
-                }
+        self.save_config(kwargs)
 
+    @staticmethod
+    def save_config(kwargs):
+        """ Setup configuration for program.  This function will also read or create a configuration file. """
+        config_path = os.path.join(os.path.expanduser('~'), '.terminal_advisor', 'config.ini')
+        config = configparser.ConfigParser()
+        config.read(config_path)
+        if len(config.sections()) == 0:  # make config
+            config['DEFAULT'] = {
+                'User': '',
+                'WebadvisorURL': '',
+                'Driver': '',
+            }
+            config['KEYRING'] = {
+                'Use': 'false',
+                'Keychain': 'terminaladvisor-webadvisor',
+            }
 
-            config['DEFAULT']['User'] = kwargs['user']
-            config['DEFAULT']['WebadvisorURL'] = kwargs['base_url']
-            config['DEFAULT']['Driver'] = kwargs['driver']
-            config['KEYRING']['Use'] = kwargs['save_password']
+        config['DEFAULT']['User'] = kwargs['user']
+        config['DEFAULT']['WebadvisorURL'] = kwargs['base_url']
+        config['DEFAULT']['Driver'] = kwargs['driver']
+        config['KEYRING']['Use'] = kwargs['save_password']
+        passwd = kwargs['password']
+        if config.getboolean('KEYRING', 'Use'):
+            passwd = keyring.get_password(config['KEYRING']['Keychain'], config['DEFAULT']['User'])
 
+        if kwargs['save_password'] and len(passwd.strip()) > 0:
+            keyring.set_password(config['KEYRING']['Keychain'], config['DEFAULT']['User'], passwd)
 
-            password = ''
-            if config.getboolean('KEYRING', 'Use'):
-                password = keyring.get_password(config['KEYRING']['Keychain'], config['DEFAULT']['User'])
+        if not os.path.exists(os.path.split(config_path)[0]):
+            os.mkdir(os.path.split(config_path)[0])
+            with open(config_path, 'w') as configfile:
+                config.write(configfile)
 
-            if kwargs['save_password'] and len(kwargs['password'].strip()) > 0:
-                keyring.set_password(config['KEYRING']['Keychain'], config['DEFAULT']['User'], password)
-
-            if not os.path.exists(os.path.split(config_path)[0]):
-                os.mkdir(os.path.split(config_path)[0])
-                with open(config_path, 'w') as configfile:
-                    config.write(configfile)
-
-            return config

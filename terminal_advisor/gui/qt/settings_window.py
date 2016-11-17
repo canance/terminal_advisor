@@ -35,6 +35,7 @@ class Ui_SettingsWindow(object):
         self.label_pass.setObjectName("label_pass")
         self.gridLayout.addWidget(self.label_pass, 2, 0, 1, 1)
         self.line_edit_pass = QtWidgets.QLineEdit(self.centralwidget)
+        self.line_edit_pass.setEchoMode(QtWidgets.QLineEdit.Password)
         self.line_edit_pass.setObjectName("line_edit_pass")
         self.gridLayout.addWidget(self.line_edit_pass, 2, 1, 1, 1)
         self.button_save = QtWidgets.QPushButton(self.centralwidget)

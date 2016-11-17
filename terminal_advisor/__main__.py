@@ -81,6 +81,7 @@ def get_args():
     parser.add_argument('-e', '--program-eval', dest='prog_eval', action='store_true', help='Run a program evaluation')
     parser.add_argument('advisee', nargs='?', help="An advisee's name or a substring of the advisee's name.")
     parser.add_argument('--gui', dest='gui', action='store_true', help='Run in GUI mode.')
+    parser.add_argument('--no-login', dest='no_login', action='store_true', help="This option is only used with --gui.  It tells the GUI not to login on startup.")
     return parser.parse_args()
 
 
@@ -93,9 +94,10 @@ def main():
 
     if args.gui:
         from terminal_advisor.gui import main
-        main.main(advisor)
+        main.main(advisor, args.no_login, config)
         sys.exit(0)
 
+    advisor.login()
     if args.advisee is not None:
         advisee = args.advisee
     else:
