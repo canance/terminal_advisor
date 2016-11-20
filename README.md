@@ -27,7 +27,8 @@ This script aims to automate mundane tasks in Webadvisor for faculty advisors.  
     - [Chrome](https://sites.google.com/a/chromium.org/chromedriver/downloads)
 3. Install [Python 3](https://www.python.org/downloads/)
 4. Install [pip](https://pip.pypa.io/en/stable/installing/)
-5. Run ```python setup.py install```
+5. Make sure wkhtmltopdf, your selenium web driver, and python3 are in your environment's PATH variable.
+6. Run ```python setup.py install```
 
 ## Usage
 ```
