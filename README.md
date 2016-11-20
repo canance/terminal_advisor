@@ -1,4 +1,4 @@
-# terminal_advisor.py
+# terminal_advisor
 
 ## Summary 
 
