@@ -39,7 +39,7 @@ class GUIApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
     @pyqtSlot()
     def update_window(self):
         # status bar
-        status = 'Logged out' if self.advisor.logged_in else 'Logged in as %s' % self.advisor.username
+        status = 'Logged out' if not self.advisor.logged_in else 'Logged in as %s' % self.advisor.username
         self.status_bar.showMessage(status)
 
         # button refresh
