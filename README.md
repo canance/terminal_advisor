@@ -66,6 +66,10 @@ optional arguments:
 - Pull midterm grades
 - Input midterm and final grades
 
+## Video Summary
+http://www.youtube.com/watch?v=2aCkRnLgyVk
+
+
 
 
 
