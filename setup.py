@@ -3,7 +3,7 @@ setup(
     name="terminal_advisor",
     version="1.1",
     packages=find_packages(),
-    install_requires=['bs4', 'configparser', 'keyring', 'pdfkit', 'selenium'],
+    install_requires=['bs4', 'configparser', 'keyring', 'pdfkit', 'PyQt5', 'selenium'],
     package_data={
         '': ['LICENSE.txt'],
     },

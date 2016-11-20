@@ -33,7 +33,7 @@ This script aims to automate mundane tasks in Webadvisor for faculty advisors.  
 ```
 usage: terminal_advisor [-h] [--user USER] [--base-url BASE_URL]
                         [--config CONFIG] [--driver [{PhantomJS,Chrome}]] [-s]
-                        [-r] [-e]
+                        [-r] [-e] [--gui] [--no-login]
                         [advisee]
 
 Automate mundane tasks in Webadvisor
@@ -52,8 +52,9 @@ optional arguments:
   -s, --save-config     Save configuration file
   -r, --remove-hold     Remove the advisement hold
   -e, --program-eval    Run a program evaluation
-
-
+  --gui                 Run in GUI mode.
+  --no-login            This option is only used with --gui. It tells the GUI
+                        not to login on startup.
 ```
 
 ## Future Development

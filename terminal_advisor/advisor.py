@@ -152,14 +152,16 @@ class Advisor:
         """ Run a program evaluation for an advisee. """
         advisee = self.advisee_search(advisee)
         driver = self.driver
+        file_name = None
         if advisee is not None:
             stu_name = advisee['stu_name']
             row_num = advisee['row_num']
             print("Running program evaluation for %s..." % stu_name)
             Select(driver.find_element_by_id("LIST_VAR2_%s" % row_num)).select_by_visible_text("EVAL Evaluate Program")
             driver.find_element_by_name("SUBMIT2").click()
-            self._process_program_evaluation(stu_name)
+            file_name = self._process_program_evaluation(stu_name)
         driver.get(self.base_url + "/")
+        return file_name
 
     def _process_program_evaluation(self, stu_name):
         driver = self.driver
@@ -177,6 +179,7 @@ class Advisor:
             file_name = file_name.replace('.', '').replace(',', '_').replace(' ', '_')
             file_name += '.pdf'
             pdfkit.from_string(html, file_name)
+            return file_name
         except TimeoutException:
             print("Webadvisor timed out!")
 

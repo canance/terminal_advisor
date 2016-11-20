@@ -1,6 +1,8 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 
 import os
+import sys
+import subprocess
 import configparser
 import keyring
 from terminal_advisor.gui.common import busy
@@ -46,7 +48,14 @@ class Run(QThread):
     def run(self):
         msg = 'Done'
         if self.action == self.program_evaluation:
-            self.advisor.run_program_evaluation(self.advisee)
+            file_name = self.advisor.run_program_evaluation(self.advisee)
+            #  http://stackoverflow.com/questions/434597/open-document-with-default-application-in-python
+            if sys.platform.startswith('darwin'):
+                subprocess.call(('open', file_name))
+            elif os.name == 'nt':
+                os.startfile(file_name)
+            elif os.name == 'posix':
+                subprocess.call(('xdg-open', file_name))
         elif self.action == self.remove_hold:
             self.advisor.remove_advisor_hold(self.advisee)
         else:

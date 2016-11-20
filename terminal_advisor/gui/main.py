@@ -80,7 +80,7 @@ class GUIApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         self.refresh_thread = Refresh(self.advisor)
         self.refresh_thread.done.connect(self.refresh_update)
         self.refresh_thread.start()
-        self.show_busy('Refreshing', 'Refreshing...')
+        # self.show_busy('Refreshing', 'Refreshing...')
 
     @pyqtSlot(list)
     def refresh_update(self, advisees):
