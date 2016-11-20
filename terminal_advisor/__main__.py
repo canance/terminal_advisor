@@ -41,7 +41,7 @@ def parse_config(args, config_path=['config.ini', os.path.join(os.path.expanduse
     password = ''
     if config.getboolean('KEYRING', 'Use'):
         password = keyring.get_password(config['KEYRING']['Keychain'], config['DEFAULT']['User'])
-    if not password:
+    if not password and not args.gui:
         password = getpass.getpass('Password: ')
         store = input("Would you like to store this password in your keychain (Y/n): ")
         if store.lower() in ['y', 'yes', '']:

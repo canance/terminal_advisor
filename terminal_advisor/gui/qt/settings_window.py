@@ -45,16 +45,13 @@ class Ui_SettingsWindow(object):
         self.check_box_save_password.setObjectName("check_box_save_password")
         self.gridLayout.addWidget(self.check_box_save_password, 2, 2, 1, 1)
         SettingsWindow.setCentralWidget(self.centralwidget)
-        self.statusbar = QtWidgets.QStatusBar(SettingsWindow)
-        self.statusbar.setObjectName("statusbar")
-        SettingsWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(SettingsWindow)
         QtCore.QMetaObject.connectSlotsByName(SettingsWindow)
 
     def retranslateUi(self, SettingsWindow):
         _translate = QtCore.QCoreApplication.translate
-        SettingsWindow.setWindowTitle(_translate("SettingsWindow", "MainWindow"))
+        SettingsWindow.setWindowTitle(_translate("SettingsWindow", "Settings"))
         self.label_url.setText(_translate("SettingsWindow", "Base URL"))
         self.label_user.setText(_translate("SettingsWindow", "User"))
         self.button_login.setText(_translate("SettingsWindow", "Login"))

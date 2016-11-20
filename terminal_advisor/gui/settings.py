@@ -3,7 +3,7 @@
 # source: https://nikolak.com/pyqt-qt-designer-getting-started/
 
 
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5 import QtWidgets
 from terminal_advisor.gui.qt import settings_window
 from terminal_advisor.gui.threads import Save, Login
@@ -12,6 +12,9 @@ import keyring
 
 
 class GUIApp(QtWidgets.QMainWindow, settings_window.Ui_SettingsWindow):
+
+    login_change = pyqtSignal()
+    settings_close = pyqtSignal()
 
     def __init__(self, advisor, config):
         super(self.__class__, self).__init__()
@@ -33,6 +36,10 @@ class GUIApp(QtWidgets.QMainWindow, settings_window.Ui_SettingsWindow):
         self.button_login.clicked.connect(self.login)
         self.button_save.clicked.connect(self.save)
 
+    def closeEvent(self, event):
+        self.settings_close.emit()
+        event.accept()
+
     @pyqtSlot()
     def login(self):
         # grab login data from form pass to thread
@@ -46,7 +53,7 @@ class GUIApp(QtWidgets.QMainWindow, settings_window.Ui_SettingsWindow):
 
     @pyqtSlot()
     def login_done(self):
-        pass
+        self.login_change.emit()
 
     @pyqtSlot()
     def save(self):
@@ -61,4 +68,5 @@ class GUIApp(QtWidgets.QMainWindow, settings_window.Ui_SettingsWindow):
 
     @pyqtSlot()
     def save_done(self):
-        self.config = __main__.parse_config(__main__.get_args())
+        self.config, _ = __main__.parse_config(__main__.get_args())
+

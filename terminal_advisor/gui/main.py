@@ -6,11 +6,10 @@ import sys
 
 from PyQt5.QtCore import pyqtSlot
 
-from PyQt5 import QtWidgets
-from terminal_advisor.gui.qt import main_window, settings_window
+from PyQt5 import QtWidgets, QtCore, QtGui
+from terminal_advisor.gui.qt import main_window
 from terminal_advisor.gui.threads import Refresh, Run, Search
 from terminal_advisor.gui import settings
-from terminal_advisor.advisor import Advisor
 
 
 class GUIApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
@@ -24,20 +23,50 @@ class GUIApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         self.run_thread = None
         self.refresh_thread = None
         self.search_thread = None
+        self.update_window()
 
         # connections
         self.button_refresh.clicked.connect(self.refresh)
         self.button_run.clicked.connect(self.run)
+
         self.line_edit_advisee.editingFinished.connect(self.advisee_search)
-        # self.action_settings.triggered.connect(self.menu_select)
-        self.button_settings.clicked.connect(self.menu_select)
+
+        self.action_settings.triggered.connect(self.menu_settings)
+        self.button_settings.clicked.connect(self.menu_settings)
+
+        self.list_advisees.currentItemChanged.connect(self.update_window)
+
+    @pyqtSlot()
+    def update_window(self):
+        # status bar
+        status = 'Logged out' if self.advisor.logged_in else 'Logged in as %s' % self.advisor.username
+        self.status_bar.showMessage(status)
+
+        # button refresh
+        enabled = self.advisor.logged_in
+        self.button_refresh.setEnabled(enabled)
+
+        # button run
+        enabled = self.list_advisees.currentItem() is not None
+        self.button_run.setEnabled(enabled)
+
+    @staticmethod
+    def show_busy(title, message):
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Information)
+        msg.setInformativeText(message)
+        msg.setStandardButtons(QtWidgets.QMessageBox.Cancel)
+        msg.setWindowTitle(title)
+        msg.exec_()
 
 
     @pyqtSlot()
-    def menu_select(self):
+    def menu_settings(self):
         self.settings_form = settings.GUIApp(self.advisor, self.config)
+        self.settings_form.login_change.connect(self.update_window)
+        self.settings_form.settings_close.connect(self.show)
         self.settings_form.show()
-
+        self.hide()
 
     @pyqtSlot()
     def advisee_search(self):
@@ -51,11 +80,13 @@ class GUIApp(QtWidgets.QMainWindow, main_window.Ui_MainWindow):
         self.refresh_thread = Refresh(self.advisor)
         self.refresh_thread.done.connect(self.refresh_update)
         self.refresh_thread.start()
+        self.show_busy('Refreshing', 'Refreshing...')
 
     @pyqtSlot(list)
     def refresh_update(self, advisees):
         self.list_advisees.clear()
         self.list_advisees.addItems(advisees)
+
 
     @pyqtSlot()
     def run(self):
@@ -78,8 +109,4 @@ def main(advisor, no_login, config):
     form.show()
     sys.exit(app.exec_())
 
-
-if __name__ == '__main__':
-    advisor = Advisor()
-    main(None)
 

@@ -1,10 +1,9 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 
-from terminal_advisor.advisor import Advisor
 import os
 import configparser
 import keyring
-
+from terminal_advisor.gui.common import busy
 
 advisee_list = []
 
@@ -21,6 +20,7 @@ class Refresh(QThread):
     def __del__(self):
         self.wait()
 
+    @busy
     def run(self):
         global advisee_list
         advisee_list = self.advisor.list_advisees()
@@ -42,6 +42,7 @@ class Run(QThread):
     def __del__(self):
         self.wait()
 
+    @busy
     def run(self):
         msg = 'Done'
         if self.action == self.program_evaluation:
@@ -65,6 +66,7 @@ class Search(QThread):
     def __del__(self):
         self.wait()
 
+    @busy
     def run(self):
         global advisee_list
         results = []
@@ -90,6 +92,7 @@ class Login(QThread):
     def __del__(self):
         self.wait()
 
+    @busy
     def run(self):
         self.advisor.username = self.username
         self.advisor.password = self.password
@@ -100,7 +103,7 @@ class Login(QThread):
 
 class Save(QThread):
 
-    done = pyqtSignal()
+    done = pyqtSignal(configparser.ConfigParser)
 
     def __init__(self, advisor, base_url, username, password, save_password):
         QThread.__init__(self)
@@ -113,6 +116,7 @@ class Save(QThread):
     def __del__(self):
         self.wait()
 
+    @busy
     def run(self):
         kwargs = {
             'user': self.username,
@@ -122,7 +126,8 @@ class Save(QThread):
             'password': self.password,
         }
 
-        self.save_config(kwargs)
+        config = self.save_config(kwargs)
+        self.done.emit(config)
 
     @staticmethod
     def save_config(kwargs):
@@ -154,6 +159,13 @@ class Save(QThread):
 
         if not os.path.exists(os.path.split(config_path)[0]):
             os.mkdir(os.path.split(config_path)[0])
-            with open(config_path, 'w') as configfile:
-                config.write(configfile)
+        with open(config_path, 'w') as configfile:
+            config.write(configfile)
+
+        return config
+
+
+
+
+
 
